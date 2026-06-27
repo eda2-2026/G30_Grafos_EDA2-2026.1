@@ -1,0 +1,57 @@
+======================================================================
+REDE DE INGREDIENTES — ANÁLISE (Entrega 1)
+Estruturas de Dados 2 — UnB
+Aluno: Patrick Anderson Carvalho dos Santos — 211030620
+Fonte: TheMealDB  |  gerado em 2026-06-27T15:04:38-03:00
+======================================================================
+
+MODELAGEM DO GRAFO (não-dirigido, simples, ponderado)
+  V = ingredientes (nomes normalizados: lowercase + trim)
+  E = pares de ingredientes que co-ocorrem em >= 1 receita
+  w({u,v}) = nº de receitas em que o par u,v co-ocorre
+  Para receita com k ingredientes -> C(k,2) arestas (peso acumulado).
+
+COMPLEXIDADE (lista de adjacência, V vértices e E arestas)
+  BFS / DFS ................ O(V + E)
+  Caminho mínimo (BFS) ..... O(V + E)
+  Componentes conexas ...... O(V + E)  (total, cada vértice/aresta 1x)
+
+----------------------------------------------------------------------
+ESTATÍSTICAS GERAIS
+  Receitas processadas ....... 535
+  Vértices (ingredientes) .... 766
+  Arestas (co-ocorrências) ... 15804
+  Componentes conexas ........ 1
+  Maior componente ........... 766 vértices
+  Densidade .................. 0.0539
+
+----------------------------------------------------------------------
+TOP-10 INGREDIENTES POR GRAU (nº de co-ingredientes distintos)
+   #  ingrediente                 grau  grau_pond.
+   1  🧄 Garlic                     434        1890
+   2  🧅 Onion                      421        1892
+   3  🧂 Salt                       388        1749
+   4  🧈 Butter                     373        1476
+   5  🫒 Olive Oil                  365        1441
+   6  🥕 Carrots                    296         903
+   7  🥚 Egg                        275         827
+   8  🌶️ Pepper                    262         792
+   9  🍬 Sugar                      258         804
+  10  🥛 Milk                       254         766
+
+----------------------------------------------------------------------
+EXEMPLO DE CAMINHO MÍNIMO (entre dois ingredientes distantes)
+  De  🍒 Redcurrants  até  🥫 Enchilada Sauce
+  Distância: 4 arestas
+  Caminho: 🍒 Redcurrants  ->  🍓 Strawberries  ->  🥛 Milk  ->  🍗 Chicken Breasts  ->  🥫 Enchilada Sauce
+
+  Exemplo nomeado (do ovo ao açafrão):
+  🥚 Egg  ->  🌸 Saffron  [1 aresta]
+
+----------------------------------------------------------------------
+CHAMADAS À API
+  cache hits ..... 615
+  network calls .. 1
+  retries ........ 0
+
+======================================================================

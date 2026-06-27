@@ -1,0 +1,16 @@
+# Cache de respostas da API (regenerável)
+.cache/
+
+# Configurações locais do Claude Code / ferramentas (não versionar)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Saídas opcionais (graph.json/analysis.txt SÃO versionados como amostra;
+# descomente se preferir não versionar)
+# output/

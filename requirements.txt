@@ -1,0 +1,6 @@
+# Esta engine NÃO usa dependências externas.
+# Tudo é feito com a biblioteca padrão do Python 3 (urllib, json, hashlib, etc.).
+# Requisito: Python >= 3.8
+#
+# Não há nada para instalar — basta rodar:
+#   python main.py build
