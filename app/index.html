@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rede de Ingredientes — Visualizador (Entrega 2)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🕸️</span>
+      <div>
+        <h1>Rede de Ingredientes</h1>
+        <p class="sub">Visualizador interativo — BFS, DFS, componentes conexas e caminho mínimo · Entrega 2</p>
+      </div>
+    </div>
+    <div class="ds">
+      <label>Dataset
+        <select id="dataset">
+          <option value="real">Real (TheMealDB)</option>
+          <option value="mock">Mock (didático)</option>
+        </select>
+      </label>
+      <button id="reset" class="btn ghost" title="Limpar destaques e reenquadrar">↺ Limpar</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="modes" role="tablist" aria-label="Modo">
+      <button class="mode-btn on" data-mode="bfs">🎯 BFS por nível</button>
+      <button class="mode-btn" data-mode="dfs">🧭 DFS</button>
+      <button class="mode-btn" data-mode="components">🎨 Componentes</button>
+      <button class="mode-btn" data-mode="path">🛣️ Caminho mínimo</button>
+    </div>
+    <div class="row" id="weight-row">
+      <label>Peso mín. da aresta <input type="range" id="weight" min="1" max="40" value="6" step="1"></label>
+      <span class="val" id="weight-val">6</span>
+    </div>
+  </div>
+
+  <main class="layout">
+    <section class="stage">
+      <svg id="graph" aria-label="Grafo de ingredientes"></svg>
+      <div id="status" class="status"></div>
+    </section>
+
+    <aside class="panel">
+      <p class="help" id="mode-help"></p>
+      <p class="info" id="bfs-info"></p>
+
+      <div id="dfs-controls" class="block">
+        <button id="run-dfs" class="btn primary">▶ Rodar DFS do nó selecionado</button>
+      </div>
+      <div id="orders" class="block orders">
+        <div class="ord-wrap"><span class="ord-h">BFS (por nível)</span><div id="bfs-order" class="ord-list"></div></div>
+        <div class="ord-wrap"><span class="ord-h">DFS (profundidade)</span><div id="dfs-order" class="ord-list"></div></div>
+      </div>
+
+      <div id="path-controls" class="block">
+        <p class="info" id="path-info"></p>
+        <button id="preset-path" class="btn ghost">Exemplo: do ovo ao açafrão</button>
+      </div>
+
+      <h2>Métricas</h2>
+      <div class="cards">
+        <div class="card"><span class="k">Vértices</span><span class="v" id="m-vertices">—</span></div>
+        <div class="card"><span class="k">Arestas</span><span class="v" id="m-edges">—</span></div>
+        <div class="card"><span class="k">Componentes</span><span class="v" id="m-components">—</span></div>
+        <div class="card"><span class="k">Maior comp.</span><span class="v" id="m-largest">—</span></div>
+        <div class="card wide"><span class="k">Selecionado: <b id="m-selected-name">—</b></span><span class="v" id="m-degree">—</span><span class="kk">grau</span></div>
+      </div>
+      <p class="validation" id="validation"></p>
+
+      <h2>Top-10 mais conectados</h2>
+      <ol class="topn" id="topn"></ol>
+
+      <h2>Legenda</h2>
+      <div class="legend">
+        <span><i class="sw" style="background:#e8553e"></i>nível 0 (selecionado)</span>
+        <span><i class="sw" style="background:#16a07a"></i>nível 1</span>
+        <span><i class="sw" style="background:#3d7fd6"></i>nível 2</span>
+        <span><i class="sw" style="background:#9b6dd6"></i>nível 3</span>
+        <span><i class="sw" style="background:#c98a1a"></i>nível 4+</span>
+        <span><i class="sw ring"></i>isolado</span>
+      </div>
+      <p class="meta" id="dataset-meta"></p>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <span>Estruturas de Dados 2 — UnB · Entrega 2 · consome o contrato <code>graph.json</code> da Entrega 1.</span>
+    <span>Algoritmos (BFS/DFS/componentes/caminho) implementados do zero em <code>js/algorithms.js</code>. D3 só faz layout/desenho.</span>
+  </footer>
+
+  <script src="data/graph-bundle.js"></script>
+  <script src="js/lib/d3.v7.min.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

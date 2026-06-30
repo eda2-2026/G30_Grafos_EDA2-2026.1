@@ -1,0 +1,119 @@
+/* Entrega 2 — estilo limpo e legível (foco em clareza pra banca). */
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212a; --line:#272c37;
+  --ink:#e7e9ee; --muted:#9aa0ad; --accent:#16a07a; --accent-2:#3d7fd6;
+  --node-bg:#262b36; --node-stroke:#4a515f; --sel:#ffffff;
+  --link:#3a4150; --link-active:#16a07a; --path:#f0b429;
+  --radius:10px; --shadow:0 2px 14px rgba(0,0,0,.25);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f4f5f3; --panel:#ffffff; --panel2:#f7f8f6; --line:#e3e4df;
+    --ink:#1d2024; --muted:#6b7280; --accent:#13855f; --accent-2:#2f6fc4;
+    --node-bg:#ffffff; --node-stroke:#c7cbd2; --sel:#1d2024;
+    --link:#d2d6dd; --link-active:#13855f; --path:#b5781a;
+    --shadow:0 2px 12px rgba(0,0,0,.08);
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100vh}
+
+/* topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{font-size:26px}
+.topbar h1{margin:0;font-size:18px;font-weight:600}
+.sub{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.ds{display:flex;align-items:center;gap:10px}
+.ds label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select,.btn{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:7px 11px;cursor:pointer}
+select{padding:6px 8px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.mode-btn{font:inherit;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13.5px}
+.mode-btn:hover{border-color:var(--accent)}
+.mode-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.row input[type=range]{width:150px}
+.row .val{min-width:22px;text-align:center;color:var(--ink);font-weight:600}
+
+/* layout */
+.layout{flex:1;display:flex;min-height:0}
+.stage{position:relative;flex:1;min-width:0;background:
+  radial-gradient(circle at 50% 40%, var(--panel2), var(--bg) 80%)}
+#graph{width:100%;height:100%;display:block}
+.panel{width:340px;flex:none;overflow:auto;background:var(--panel);border-left:1px solid var(--line);padding:14px 16px}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+  margin:18px 0 8px;font-weight:600}
+.help{font-size:13.5px;line-height:1.55;background:var(--panel2);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 10px}
+.info{font-size:13px;color:var(--muted);margin:8px 0;min-height:1px}
+.block{margin:10px 0}
+.orders .ord-wrap{margin:6px 0}
+.ord-h{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.ord-list{font-size:16px;line-height:1.8;word-break:break-word}
+.ord{display:inline-block;margin-right:2px}
+.ord-list .ord:nth-child(1){font-weight:700}
+
+/* metric cards */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.card.wide{grid-column:1/-1;flex-direction:row;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.card .k{font-size:12px;color:var(--muted)}
+.card .kk{font-size:11px;color:var(--muted)}
+.card .v{font-size:22px;font-weight:700}
+.card.wide .v{font-size:22px}
+.validation{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+
+/* top-N */
+.topn{list-style:none;margin:6px 0 0;padding:0}
+.topn li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:14px}
+.topn li:hover{background:var(--panel2)}
+.topn .rk{width:18px;color:var(--muted);font-size:12px;text-align:right}
+.topn .dg{margin-left:auto;font-weight:700;color:var(--accent)}
+
+/* legend */
+.legend{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.sw{width:13px;height:13px;border-radius:50%;display:inline-block}
+.sw.ring{background:transparent;border:2px dashed var(--accent-2)}
+.meta{font-size:11.5px;color:var(--muted);margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+
+/* svg graph elements */
+.link{stroke:var(--link);opacity:.5}
+.link.active{stroke:var(--link-active);opacity:.95}
+.link.path{stroke:var(--path);opacity:1;stroke-width:3.5}
+.node{cursor:pointer}
+.node .emoji{pointer-events:none;user-select:none}
+.node .label{font-size:11px;fill:var(--muted);pointer-events:none}
+.node.sel .label{fill:var(--ink);font-weight:600}
+.node .badge{font-size:11px;font-weight:700;fill:#fff;paint-order:stroke;
+  stroke:rgba(0,0,0,.55);stroke-width:3px;pointer-events:none;dominant-baseline:central}
+.node.faded{opacity:.18}
+.node.isolated .dot{stroke-dasharray:3 3}
+
+/* footer + status */
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:8px 18px;background:var(--panel);border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+.foot code{background:var(--panel2);padding:1px 5px;border-radius:5px}
+.status{position:absolute;left:50%;top:14px;transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);font-size:13px;padding:8px 14px;border-radius:999px;
+  opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:var(--shadow)}
+.status.show{opacity:.95}
+
+@media (max-width:820px){
+  .panel{width:300px}
+}

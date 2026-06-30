@@ -1,0 +1,37 @@
+{
+  "meta": { "source": "Mock (didático)", "generated_at": "2026-01-01T00:00:00-03:00", "num_recipes": 6 },
+  "nodes": [
+    { "id": "flour",   "name": "Flour",   "emoji": "🌾", "degree": 2, "component": 0 },
+    { "id": "egg",     "name": "Egg",     "emoji": "🥚", "degree": 3, "component": 0 },
+    { "id": "milk",    "name": "Milk",    "emoji": "🥛", "degree": 2, "component": 0 },
+    { "id": "butter",  "name": "Butter",  "emoji": "🧈", "degree": 3, "component": 0 },
+    { "id": "sugar",   "name": "Sugar",   "emoji": "🍬", "degree": 2, "component": 0 },
+    { "id": "onion",   "name": "Onion",   "emoji": "🧅", "degree": 3, "component": 1 },
+    { "id": "garlic",  "name": "Garlic",  "emoji": "🧄", "degree": 3, "component": 1 },
+    { "id": "tomato",  "name": "Tomato",  "emoji": "🍅", "degree": 3, "component": 1 },
+    { "id": "beef",    "name": "Beef",    "emoji": "🥩", "degree": 1, "component": 1 },
+    { "id": "basil",   "name": "Basil",   "emoji": "🌿", "degree": 2, "component": 1 },
+    { "id": "lemon",   "name": "Lemon",   "emoji": "🍋", "degree": 1, "component": 2 },
+    { "id": "honey",   "name": "Honey",   "emoji": "🍯", "degree": 1, "component": 2 },
+    { "id": "rice",    "name": "Rice",    "emoji": "🍚", "degree": 1, "component": 3 },
+    { "id": "chicken", "name": "Chicken", "emoji": "🍗", "degree": 1, "component": 3 },
+    { "id": "saffron", "name": "Saffron", "emoji": "🌸", "degree": 0, "component": 4 }
+  ],
+  "edges": [
+    { "source": "flour",  "target": "egg",    "weight": 5 },
+    { "source": "flour",  "target": "butter", "weight": 4 },
+    { "source": "egg",    "target": "milk",   "weight": 3 },
+    { "source": "egg",    "target": "sugar",  "weight": 2 },
+    { "source": "butter", "target": "sugar",  "weight": 3 },
+    { "source": "butter", "target": "milk",   "weight": 2 },
+    { "source": "onion",  "target": "garlic", "weight": 6 },
+    { "source": "onion",  "target": "tomato", "weight": 4 },
+    { "source": "garlic", "target": "tomato", "weight": 3 },
+    { "source": "onion",  "target": "beef",   "weight": 3 },
+    { "source": "garlic", "target": "basil",  "weight": 2 },
+    { "source": "tomato", "target": "basil",  "weight": 2 },
+    { "source": "lemon",  "target": "honey",  "weight": 2 },
+    { "source": "rice",   "target": "chicken","weight": 3 }
+  ],
+  "stats": { "num_vertices": 15, "num_edges": 14, "num_components": 5, "largest_component_size": 5 }
+}

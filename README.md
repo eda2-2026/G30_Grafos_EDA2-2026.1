@@ -9,6 +9,13 @@ reais (API [TheMealDB](https://www.themealdb.com/)) e rodamos **BFS**, **DFS**,
 > contrato `graph.json` que a **Entrega 2** (visualização) irá consumir.
 
 **Aluno responsável por esta entrega:** Patrick Anderson Carvalho dos Santos — **211030620**
+**Aluno responsável por esta entrega:** Vinicius Castelo Ferreira — **200062883**
+
+---
+
+## Apresentação
+
+[Apresentação](https://www.youtube.com/watch?v=Tuye4VxGCYg)
 
 ---
 
@@ -127,6 +134,44 @@ python -m unittest discover -s tests -v
 
 ---
 
+### Interface gráfica
+
+Após gerar o grafo, é possível visualizar e executar os algoritmos pela interface web.
+
+1. Na raiz do projeto, gere os dados:
+
+```bash
+python main.py build
+```
+
+2. Entre na pasta da interface:
+
+```bash
+cd app
+```
+
+3. Inicie um servidor HTTP local:
+
+```bash
+python -m http.server 8000
+```
+
+> No Windows, se o comando `python` não funcionar, utilize:
+>
+> ```bash
+> py -m http.server 8000
+> ```
+
+4. Abra o navegador no endereço:
+
+```
+http://localhost:8000
+```
+
+A interface permite visualizar o grafo e executar interativamente os algoritmos
+de **BFS**, **DFS**, **caminho mínimo** e **componentes conexas** implementados.
+
+---
 ## 5. Contrato de saída: `graph.json`
 
 ```jsonc

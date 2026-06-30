@@ -2,7 +2,7 @@
 REDE DE INGREDIENTES — ANÁLISE (Entrega 1)
 Estruturas de Dados 2 — UnB
 Aluno: Patrick Anderson Carvalho dos Santos — 211030620
-Fonte: TheMealDB  |  gerado em 2026-06-27T15:04:38-03:00
+Fonte: TheMealDB  |  gerado em 2026-06-29T19:50:56-03:00
 ======================================================================
 
 MODELAGEM DO GRAFO (não-dirigido, simples, ponderado)
@@ -18,26 +18,26 @@ COMPLEXIDADE (lista de adjacência, V vértices e E arestas)
 
 ----------------------------------------------------------------------
 ESTATÍSTICAS GERAIS
-  Receitas processadas ....... 535
-  Vértices (ingredientes) .... 766
-  Arestas (co-ocorrências) ... 15804
+  Receitas processadas ....... 560
+  Vértices (ingredientes) .... 779
+  Arestas (co-ocorrências) ... 16298
   Componentes conexas ........ 1
-  Maior componente ........... 766 vértices
-  Densidade .................. 0.0539
+  Maior componente ........... 779 vértices
+  Densidade .................. 0.0538
 
 ----------------------------------------------------------------------
 TOP-10 INGREDIENTES POR GRAU (nº de co-ingredientes distintos)
    #  ingrediente                 grau  grau_pond.
-   1  🧄 Garlic                     434        1890
-   2  🧅 Onion                      421        1892
-   3  🧂 Salt                       388        1749
-   4  🧈 Butter                     373        1476
-   5  🫒 Olive Oil                  365        1441
-   6  🥕 Carrots                    296         903
-   7  🥚 Egg                        275         827
-   8  🌶️ Pepper                    262         792
-   9  🍬 Sugar                      258         804
-  10  🥛 Milk                       254         766
+   1  🧄 Garlic                     443        2011
+   2  🧅 Onion                      427        1974
+   3  🧂 Salt                       403        1875
+   4  🧈 Butter                     378        1516
+   5  🫒 Olive Oil                  369        1468
+   6  🥕 Carrots                    304         966
+   7  🥚 Egg                        285         851
+   8  🛢️ Vegetable Oil             277         868
+   9  💧 Water                      271         935
+  10  🍬 Sugar                      270         864
 
 ----------------------------------------------------------------------
 EXEMPLO DE CAMINHO MÍNIMO (entre dois ingredientes distantes)
@@ -50,8 +50,8 @@ EXEMPLO DE CAMINHO MÍNIMO (entre dois ingredientes distantes)
 
 ----------------------------------------------------------------------
 CHAMADAS À API
-  cache hits ..... 615
-  network calls .. 1
+  cache hits ..... 0
+  network calls .. 641
   retries ........ 0
 
 ======================================================================

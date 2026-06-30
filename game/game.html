@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alquimia de Ingredientes — Rede de Receitas (Entrega 2 · preview)</title>
+<style>
+  :root{
+    --bg:#faf9f5; --panel:#ffffff; --ink:#2c2c2a; --muted:#6f6e68;
+    --line:#e4e2d9; --line2:#d2d0c6; --accent:#1d9e75; --accent-bg:#e1f5ee;
+    --gold:#ba7517; --chip:#ffffff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1a1a17; --panel:#222019; --ink:#e8e6dd; --muted:#a3a299;
+      --line:#36352d; --line2:#4a483f; --accent:#5dcaa5; --accent-bg:#0f3a2e;
+      --gold:#eda100; --chip:#26241d;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  .wrap{max-width:1040px;margin:0 auto;padding:18px 16px 40px}
+  h1{font-size:21px;font-weight:600;margin:0 0 2px;display:flex;gap:8px;align-items:center}
+  .lead{color:var(--muted);font-size:14px;margin:0 0 14px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .pill{background:var(--accent-bg);color:var(--accent);font-weight:600;font-size:13px;
+        padding:6px 12px;border-radius:999px}
+  button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line2);
+         border-radius:8px;padding:7px 12px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button:active{transform:scale(.98)}
+  .sel{font-size:14px;min-height:24px;margin-bottom:10px;color:var(--muted)}
+  .sel b{color:var(--ink);font-weight:600}
+  main{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .board{position:relative;flex:1 1 520px;min-width:300px;background:var(--panel);
+         border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  canvas{display:block;width:100%;cursor:default}
+  #toast{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+         background:var(--ink);color:var(--bg);font-size:13px;padding:8px 14px;border-radius:999px;
+         opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+  #toast.show{opacity:.94}
+  .side{flex:1 1 250px;min-width:230px;max-width:320px}
+  #search{width:100%;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;
+          background:var(--panel);color:var(--ink);font:inherit;margin-bottom:10px}
+  .pantry{display:flex;flex-wrap:wrap;gap:6px;max-height:340px;overflow:auto;padding:2px}
+  .chip{display:flex;align-items:center;gap:6px;padding:5px 9px 5px 7px;border-radius:999px;
+        background:var(--chip);border:1px solid var(--line);font-size:13px}
+  .chip .ce{font-size:16px;line-height:1}
+  .chip.sel{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:600}
+  .log{margin-top:14px;font-size:13px}
+  .log summary{cursor:pointer;color:var(--muted)}
+  .logrow{padding:4px 2px;border-bottom:1px solid var(--line);font-size:14px}
+  .foot{color:var(--muted);font-size:12px;margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+  .help{color:var(--muted);font-size:12.5px;margin:2px 0 12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧪 Alquimia de Ingredientes</h1>
+  <p class="lead">Combine dois ingredientes para descobrir um terceiro — derivado da rede real de co-ocorrência de receitas (TheMealDB). Você começa com ingredientes básicos de cozinha e o grafo cresce conforme você descobre.</p>
+  <div class="bar">
+    <span class="pill" id="count">—</span>
+    <button id="hint">💡 Dica</button>
+    <button id="reset">↺ Reiniciar</button>
+  </div>
+  <div class="sel" id="sel"></div>
+  <main>
+    <section class="board"><canvas id="cv"></canvas><div id="toast"></div></section>
+    <aside class="side">
+      <input id="search" placeholder="buscar na despensa…" autocomplete="off">
+      <div class="help">Clique num ingrediente (aqui ou no grafo) e depois em outro.</div>
+      <div class="pantry" id="pantry"></div>
+      <details class="log"><summary>Combinações descobertas (<span id="logcount">0</span>)</summary><div id="logbody"></div></details>
+    </aside>
+  </main>
+  <p class="foot">Extra do projeto · consome o contrato <code>graph.json</code> da rede de ingredientes. Regra (grafo puro): A + B → o vizinho comum de maior afinidade (cosseno) ainda não descoberto, excluindo onipresentes (sal, água, óleos…). Começa com ingredientes básicos; há 890 ingredientes para descobrir.</p>
+</div>
+
+<script src="game_data.js"></script>
+<script>
+(function(){
+"use strict";
+const G = window.GAME_DATA;
+const nodes = G.nodes;                       // {id,n,e,d}
+const idx = {}; nodes.forEach((nd,i)=>idx[nd.id]=i);
+
+// adjacência ponderada + grau ponderado
+const adj  = nodes.map(()=>new Map());
+const wdeg = new Array(nodes.length).fill(0);
+let wmax = 1;
+for(const ed of G.edges){ const a=ed[0],b=ed[1],w=ed[2];
+  adj[a].set(b,w); adj[b].set(a,w); wdeg[a]+=w; wdeg[b]+=w; if(w>wmax)wmax=w; }
+
+// vizinhos mais fortes (limita arestas desenhadas e a atração da física)
+const topNbrs = adj.map(m=>[...m.entries()].sort((p,q)=>q[1]-p[1]).slice(0,6));
+
+// raios por grau global
+let dmin=Infinity,dmax=0; for(const nd of nodes){ if(nd.d<dmin)dmin=nd.d; if(nd.d>dmax)dmax=nd.d; }
+const R = nodes.map(nd=>8 + 8*Math.sqrt((nd.d-dmin)/Math.max(1,(dmax-dmin))));
+
+// "onipresentes": combináveis, mas nunca são RESULTADO (e são ingredientes-base)
+const BLACK = new Set(['salt','water','pepper','black pepper','olive oil','vegetable oil','sunflower oil','oil','plain flour']
+                .map(s=>idx[s]).filter(x=>x!=null));
+
+// ---- regra de combinação (idêntica ao protótipo Python) -------------------
+// score(C) = (w(A,C)/sqrt(Wa*Wc)) * (w(B,C)/sqrt(Wb*Wc)) ; C = vizinho comum, C∉{A,B,BLACK}
+function combine(a,b){
+  // Entre os vizinhos comuns de A e B (afinidade cosseno, excluindo
+  // onipresentes), PREFERE o de maior afinidade que ainda NÃO foi descoberto —
+  // assim cada combinação revela algo novo até esgotar o par. Só devolve um
+  // já-descoberto quando não há mais nada novo na vizinhança.
+  let bestNew=-1, bestNewSc=-1, bestAny=-1, bestAnySc=-1;
+  for(const ent of adj[a]){ const c=ent[0], wac=ent[1];
+    if(c===a||c===b||BLACK.has(c)) continue;
+    const wbc = adj[b].get(c); if(wbc===undefined) continue;
+    const sc = (wac/Math.sqrt(wdeg[a]*wdeg[c])) * (wbc/Math.sqrt(wdeg[b]*wdeg[c]));
+    if(sc>bestAnySc){ bestAnySc=sc; bestAny=c; }
+    if(!discSet.has(c) && sc>bestNewSc){ bestNewSc=sc; bestNew=c; }
+  }
+  return bestNew>=0 ? bestNew : bestAny; // -1 = sem reação (nenhum vizinho comum)
+}
+
+// ---- estado ---------------------------------------------------------------
+// ingredientes-base: staples óbvios de cozinha. Por serem iniciais, não viram
+// "resultado" de combinações estranhas. Poucos -> o grafo começa limpo e cresce.
+const BASE = ['water','salt','milk','beef','onion','eggs','flour']
+              .map(s=>idx[s]).filter(x=>x!=null);
+let discSet, discList, P, selected=null, hovered=null, combosSeen, logCount=0, links, gameAdj;
+
+// ---- canvas / física ------------------------------------------------------
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let Wd=600, Hd=460, K=40, heat=0, dirty=true, temp=11;
+const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+let COL={};
+function palette(){
+  const d=darkMQ.matches;
+  COL = d
+    ? {edge:'#615f54', nodeBg:'#3b3930', border:'#857f6e', text:'#ece9df', accent:'#6fd6ad', gold:'#f0b429'}
+    : {edge:'#d0cec4', nodeBg:'#ffffff', border:'#c7c5bb', text:'#2c2c2a', accent:'#1d9e75', gold:'#ba7517'};
+}
+palette(); darkMQ.addEventListener('change',()=>{palette();dirty=true;kick();});
+
+function recomputeK(){ K = Math.sqrt(Wd*Hd/Math.max(1,discList.length))*0.5; }
+function resize(){
+  const w = cv.parentElement.clientWidth || 600;
+  Wd = Math.max(300, w); Hd = 460;
+  const dpr = window.devicePixelRatio||1;
+  cv.width = Wd*dpr; cv.height = Hd*dpr;
+  cv.style.height = Hd+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  recomputeK(); heat=Math.max(heat,30); dirty=true; if(discList){ renderNow(0); } kick();
+}
+window.addEventListener('resize',resize);
+
+function place(i,parents){
+  let x=Wd/2+(Math.random()-.5)*60, y=Hd/2+(Math.random()-.5)*60;
+  if(parents){ let sx=0,sy=0,c=0; for(const p of parents){ if(P[p]){sx+=P[p].x;sy+=P[p].y;c++;} }
+    if(c){ x=sx/c+(Math.random()-.5)*36; y=sy/c+(Math.random()-.5)*36; } }
+  P[i]={x,y,dx:0,dy:0,born:performance.now(),fixed:false};
+}
+
+function physics(){
+  const N=discList.length; if(N<2) return;
+  for(const i of discList){ P[i].dx=0; P[i].dy=0; }
+  for(let a=0;a<N;a++){ const i=discList[a], pi=P[i];
+    for(let b=a+1;b<N;b++){ const j=discList[b], pj=P[j];
+      let dx=pi.x-pj.x, dy=pi.y-pj.y, dist=Math.hypot(dx,dy)||0.01;
+      const rep=K*K/dist, ux=dx/dist, uy=dy/dist;
+      pi.dx+=ux*rep; pi.dy+=uy*rep; pj.dx-=ux*rep; pj.dy-=uy*rep;
+    }
+  }
+  for(const lk of links){ const pi=P[lk[0]], pj=P[lk[1]]; if(!pi||!pj) continue;
+    let dx=pi.x-pj.x, dy=pi.y-pj.y, dist=Math.hypot(dx,dy)||0.01;
+    const att=dist*dist/K*0.02*(0.6+lk[2]/wmax), ux=dx/dist, uy=dy/dist;
+    pi.dx-=ux*att; pi.dy-=uy*att; pj.dx+=ux*att; pj.dy+=uy*att;
+  }
+  const cx=Wd/2, cy=Hd/2;
+  for(const i of discList){ const p=P[i];
+    p.dx+=(cx-p.x)*0.03; p.dy+=(cy-p.y)*0.03;        // gravidade ao centro
+    if(p.fixed) continue;
+    let d=Math.hypot(p.dx,p.dy)||0.01, m=Math.min(d,temp);
+    p.x+=p.dx/d*m; p.y+=p.dy/d*m;
+    // contenção ELÍPTICA (em vez de retângulo) → blob arredondado, sem cantos
+    const ax=cx-R[i]-6, ay=cy-R[i]-6;
+    let nx=(p.x-cx)/ax, ny=(p.y-cy)/ay, rr=Math.hypot(nx,ny);
+    if(rr>1){ p.x=cx+nx/rr*ax; p.y=cy+ny/rr*ay; }
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,Wd,Hd);
+  const focusOn = (hovered!=null||selected!=null);
+  ctx.lineWidth=1;
+  for(const lk of links){ const a=lk[0], b=lk[1], pi=P[a], pj=P[b]; if(!pi||!pj) continue;
+    const foc=(a===hovered||b===hovered||a===selected||b===selected);
+    ctx.strokeStyle=foc?COL.accent:COL.edge; ctx.globalAlpha=foc?0.95:(focusOn?0.15:0.4);
+    ctx.beginPath(); ctx.moveTo(pi.x,pi.y); ctx.lineTo(pj.x,pj.y); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  for(const i of discList){ const p=P[i]; let r=R[i];
+    const age=performance.now()-(p.born||0); if(age<430){ const t=age/430; r*=0.35+0.65*(1-(1-t)*(1-t)); }
+    const isFocus=(i===hovered||i===selected);
+    const isNbr=(hovered!=null&&gameAdj[hovered].has(i))||(selected!=null&&gameAdj[selected].has(i));
+    ctx.globalAlpha = (focusOn&&!isFocus&&!isNbr)?0.4:1;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,6.2832); ctx.fillStyle=COL.nodeBg; ctx.fill();
+    ctx.lineWidth=(i===selected)?3:(isFocus?2:1);
+    ctx.strokeStyle=(i===selected)?COL.gold:(isFocus?COL.accent:COL.border); ctx.stroke();
+    ctx.font=Math.max(12,r*1.1).toFixed(0)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(nodes[i].e, p.x, p.y+1);
+    if(isFocus||isNbr){ ctx.globalAlpha=1; ctx.font='12px sans-serif'; ctx.fillStyle=COL.text;
+      ctx.fillText(nodes[i].n, p.x, p.y+r+10); }
+    ctx.globalAlpha=1;
+  }
+}
+
+let running=false;
+function kick(){ if(!running){ running=true; requestAnimationFrame(loop); } }
+function loop(){
+  if(heat>0){ physics(); heat--; dirty=true; }
+  if(dirty){ draw(); dirty=false; }
+  if(heat>0){ requestAnimationFrame(loop); } else { running=false; }
+}
+// Desenho SÍNCRONO: nunca depende só do requestAnimationFrame (que fica pausado
+// em abas ocultas e às vezes atrasa). Toda mudança de estado pinta na hora; o
+// rAF só acrescenta a animação suave de acomodação quando a página está visível.
+function renderNow(steps){ steps=steps||0; for(var s=0;s<steps;s++) physics(); draw(); dirty=false; }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ heat=Math.max(heat,30); renderNow(0); kick(); } });
+
+// ---- hit-testing / interação ---------------------------------------------
+function nodeAt(x,y){
+  let found=-1, fd=Infinity;
+  for(const i of discList){ const p=P[i], dx=p.x-x, dy=p.y-y, d=dx*dx+dy*dy, rr=(R[i]+5)*(R[i]+5);
+    if(d<=rr && d<fd){ fd=d; found=i; } }
+  return found;
+}
+function toLocal(ev){ const r=cv.getBoundingClientRect(); return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)}; }
+
+let down=null, dragging=null, moved=false;
+cv.addEventListener('pointerdown',ev=>{ const l=toLocal(ev); const i=nodeAt(l.x,l.y);
+  down={i,x:l.x,y:l.y}; moved=false; if(i>=0){ cv.setPointerCapture(ev.pointerId); } });
+cv.addEventListener('pointermove',ev=>{ const l=toLocal(ev);
+  if(down){
+    if(!moved && Math.hypot(l.x-down.x,l.y-down.y)>4){ moved=true; if(down.i>=0){ dragging=down.i; P[dragging].fixed=true; cv.style.cursor='grabbing'; } }
+    if(dragging!=null){ P[dragging].x=l.x; P[dragging].y=l.y; renderNow(0); return; }
+  }
+  const h=nodeAt(l.x,l.y); if(h!==hovered){ hovered=h; cv.style.cursor=h>=0?'pointer':'default'; renderNow(0); }
+});
+function endPointer(){ if(dragging!=null){ P[dragging].fixed=false; dragging=null; cv.style.cursor='default'; heat=Math.max(heat,30); renderNow(0); kick(); }
+  else if(down && !moved && down.i>=0){ handleClick(down.i); } down=null; }
+cv.addEventListener('pointerup',endPointer);
+cv.addEventListener('pointercancel',endPointer);
+cv.addEventListener('pointerleave',()=>{ if(!down){ hovered=null; dirty=true; } });
+
+// ---- combinar / descobrir -------------------------------------------------
+function E(i){ return nodes[i].e; }
+function handleClick(i){
+  if(selected==null){ selected=i; }
+  else if(selected===i){ selected=null; }
+  else { const a=selected; selected=null; tryCombine(a,i); }
+  updateSelUI(); renderNow(0); kick();
+}
+function tryCombine(a,b){
+  const c=combine(a,b);
+  if(c<0){ toast('🚫 '+nodes[a].n+' + '+nodes[b].n+' não reagiu'); return; }
+  if(discSet.has(c)){ toast('♻️ '+E(a)+' + '+E(b)+' = '+E(c)+' '+nodes[c].n+' (já descoberto)'); pop(c); return; }
+  discover(c,[a,b]); logAdd(a,b,c); toast('✨ Novo! '+E(a)+' + '+E(b)+' = '+E(c)+' '+nodes[c].n);
+}
+function discover(i,parents){ discSet.add(i); discList.push(i); place(i,parents);
+  if(parents) for(const p of parents){ if(p===i) continue;     // arestas da ÁRVORE de descoberta
+    const w=adj[i].get(p)||1; links.push([i,p,w]); gameAdj[i].add(p); gameAdj[p].add(i); }
+  addChip(i); updateCount(); recomputeK(); heat=110; renderNow(8); kick(); }
+function pop(i){ if(P[i]){ P[i].born=performance.now(); heat=Math.max(heat,30); renderNow(0); kick(); } }
+
+// ---- despensa / busca / log ----------------------------------------------
+const pantryEl=document.getElementById('pantry'), searchEl=document.getElementById('search');
+const chipEls={};
+function addChip(i){
+  const b=document.createElement('button'); b.className='chip'; b.type='button'; b.title='grau '+nodes[i].d;
+  b.innerHTML='<span class="ce">'+nodes[i].e+'</span><span class="cn">'+nodes[i].n+'</span>';
+  b.addEventListener('click',()=>handleClick(i));
+  chipEls[i]=b; pantryEl.appendChild(b); filterChip(b,i);
+}
+function filterChip(b,i){ const q=searchEl.value.trim().toLowerCase();
+  b.style.display = (!q || nodes[i].n.toLowerCase().includes(q)) ? '' : 'none'; }
+searchEl.addEventListener('input',()=>{ for(const i in chipEls) filterChip(chipEls[i],+i); });
+
+const logBody=document.getElementById('logbody'), logCountEl=document.getElementById('logcount');
+function logAdd(a,b,c){ const key=(a<b?a+'_'+b:b+'_'+a)+'_'+c; if(combosSeen.has(key)) return; combosSeen.add(key);
+  const row=document.createElement('div'); row.className='logrow';
+  row.textContent=E(a)+' '+nodes[a].n+'  +  '+E(b)+' '+nodes[b].n+'  =  '+E(c)+' '+nodes[c].n;
+  logBody.prepend(row); logCount++; logCountEl.textContent=logCount; }
+
+// ---- UI helpers -----------------------------------------------------------
+const countEl=document.getElementById('count'), selEl=document.getElementById('sel');
+function updateCount(){ countEl.textContent='🧪 '+discList.length+' / '+nodes.length+' descobertos'; }
+function updateSelUI(){
+  for(const i in chipEls) chipEls[i].classList.toggle('sel', (+i)===selected);
+  selEl.innerHTML = selected==null
+    ? 'Nenhum selecionado — clique num ingrediente para começar.'
+    : 'Selecionado: <b>'+E(selected)+' '+nodes[selected].n+'</b> + ? &nbsp;<span style="color:var(--muted)">(clique em outro para combinar)</span>';
+}
+let toastT=null;
+const toastEl=document.getElementById('toast');
+function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),2600); }
+
+document.getElementById('hint').addEventListener('click',()=>{
+  if(discList.length<2){ toast('💡 descubra mais alguns antes'); return; }
+  for(let t=0;t<5000;t++){ const a=discList[(Math.random()*discList.length)|0], b=discList[(Math.random()*discList.length)|0];
+    if(a===b) continue; const c=combine(a,b);
+    if(c>=0 && !discSet.has(c)){ selected=null; pop(a); pop(b); toast('💡 Tente '+E(a)+' '+nodes[a].n+' + '+E(b)+' '+nodes[b].n); updateSelUI(); return; } }
+  toast('💡 sem dica óbvia — experimente livremente!');
+});
+document.getElementById('reset').addEventListener('click',start);
+
+function start(){
+  discSet=new Set(); discList=[]; P={}; combosSeen=new Set(); selected=null; hovered=null;
+  links=[]; gameAdj=nodes.map(()=>new Set());
+  pantryEl.innerHTML=''; logBody.innerHTML=''; logCount=0; logCountEl.textContent='0';
+  for(const k in chipEls) delete chipEls[k];
+  resize();
+  BASE.forEach(i=>{ discSet.add(i); discList.push(i); place(i,null); addChip(i); });
+  recomputeK(); updateCount(); updateSelUI(); heat=70; renderNow(90); kick();
+}
+
+start();
+})();
+</script>
+</body>
+</html>
